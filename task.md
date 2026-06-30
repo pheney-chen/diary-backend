@@ -1,5 +1,9 @@
 # 日记小程序后端开发任务清单
 
+## 开发规范
+
+- 所有数据库查询只允许在 XML 中写 SQL 脚本，禁止使用 MyBatisPlus 的 QueryWrapper/LambdaQueryWrapper 等 wrapper 方式
+
 ## P0 核心功能（必做）
 
 ### 用户认证模块
