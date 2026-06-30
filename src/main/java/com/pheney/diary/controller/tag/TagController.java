@@ -5,6 +5,8 @@ import com.pheney.diary.common.R;
 import com.pheney.diary.dto.request.RenameTagRequest;
 import com.pheney.diary.dto.response.DiaryResponse;
 import com.pheney.diary.dto.response.TagResponse;
+import com.pheney.diary.service.TagService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -13,12 +15,17 @@ import java.util.List;
 @RequestMapping("/api/tags")
 public class TagController {
 
+    @Autowired
+    private TagService tagService;
+
     /**
      * 获取所有标签
      */
     @GetMapping
     public R<List<TagResponse>> getAllTags() {
-        return R.success();
+        Long userId = getCurrentUserId();
+        List<TagResponse> tags = tagService.getAllTags(userId);
+        return R.success(tags);
     }
 
     /**
@@ -29,7 +36,10 @@ public class TagController {
             @PathVariable String name,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int pageSize) {
-        return R.success();
+        Long userId = getCurrentUserId();
+        List<DiaryResponse> list = tagService.getDiariesByTag(userId, name, page, pageSize);
+        long total = tagService.countDiariesByTag(userId, name);
+        return R.success(PageResult.of(list, total, page, pageSize));
     }
 
     /**
@@ -37,6 +47,8 @@ public class TagController {
      */
     @PutMapping("/{name}")
     public R<Void> renameTag(@PathVariable String name, @RequestBody RenameTagRequest request) {
+        Long userId = getCurrentUserId();
+        tagService.renameTag(userId, name, request.getNewName());
         return R.success();
     }
 
@@ -45,6 +57,12 @@ public class TagController {
      */
     @DeleteMapping("/{name}")
     public R<Void> deleteTag(@PathVariable String name) {
+        Long userId = getCurrentUserId();
+        tagService.deleteTag(userId, name);
         return R.success();
+    }
+
+    private Long getCurrentUserId() {
+        return 1L;
     }
 }

@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pheney.diary.mapper.DiaryMapper">
+
+    <insert id="insert" parameterType="com.pheney.diary.entity.Diary"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO diaries (user_id, title, content, mood, type, voice, voice_duration,
+                            video, video_thumb, diary_date, created_at, updated_at, deleted)
+        VALUES (#{userId}, #{title}, #{content}, #{mood}, #{type}, #{voice},
+                #{voiceDuration}, #{video}, #{videoThumb}, #{diaryDate}, NOW(), NOW(), 0)
+    </insert>
+
+    <select id="findById" resultType="com.pheney.diary.entity.Diary">
+        SELECT id, user_id, title, content, mood, type, voice, voice_duration,
+               video, video_thumb, diary_date, created_at, updated_at, deleted
+        FROM diaries
+        WHERE id = #{id} AND deleted = 0
+    </select>
+
+    <update id="update" parameterType="com.pheney.diary.entity.Diary">
+        UPDATE diaries
+        SET title = #{title},
+            content = #{content},
+            mood = #{mood},
+            type = #{type},
+            voice = #{voice},
+            voice_duration = #{voiceDuration},
+            video = #{video},
+            video_thumb = #{videoThumb},
+            updated_at = NOW()
+        WHERE id = #{id} AND deleted = 0
+    </update>
+
+    <update id="deleteById">
+        UPDATE diaries
+        SET deleted = 1, updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <select id="findByUserId" resultType="com.pheney.diary.entity.Diary">
+        SELECT id, user_id, title, content, mood, type, voice, voice_duration,
+               video, video_thumb, diary_date, created_at, updated_at, deleted
+        FROM diaries
+        WHERE user_id = #{userId} AND deleted = 0
+        ORDER BY diary_date DESC, created_at DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="countByUserId" resultType="long">
+        SELECT COUNT(*)
+        FROM diaries
+        WHERE user_id = #{userId} AND deleted = 0
+    </select>
+
+    <select id="findByUserIdAndDate" resultType="com.pheney.diary.entity.Diary">
+        SELECT id, user_id, title, content, mood, type, voice, voice_duration,
+               video, video_thumb, diary_date, created_at, updated_at, deleted
+        FROM diaries
+        WHERE user_id = #{userId} AND diary_date = #{date} AND deleted = 0
+        ORDER BY created_at DESC
+    </select>
+
+    <select id="findByUserIdAndYearMonth" resultType="com.pheney.diary.entity.Diary">
+        SELECT id, user_id, title, content, mood, type, voice, voice_duration,
+               video, video_thumb, diary_date, created_at, updated_at, deleted
+        FROM diaries
+        WHERE user_id = #{userId}
+          AND YEAR(diary_date) = #{year}
+          AND MONTH(diary_date) = #{month}
+          AND deleted = 0
+        ORDER BY diary_date DESC, created_at DESC
+    </select>
+
+    <select id="search" resultType="com.pheney.diary.entity.Diary">
+        SELECT DISTINCT d.id, d.user_id, d.title, d.content, d.mood, d.type,
+               d.voice, d.voice_duration, d.video, d.video_thumb, d.diary_date,
+               d.created_at, d.updated_at, d.deleted
+        FROM diaries d
+        LEFT JOIN diary_tags dt ON d.id = dt.diary_id
+        LEFT JOIN tags t ON dt.tag_id = t.id
+        WHERE d.user_id = #{userId}
+          AND d.deleted = 0
+          AND (
+            d.title LIKE CONCAT('%', #{keyword}, '%')
+            OR d.content LIKE CONCAT('%', #{keyword}, '%')
+            OR t.name LIKE CONCAT('%', #{keyword}, '%')
+          )
+        ORDER BY d.diary_date DESC, d.created_at DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="countSearch" resultType="long">
+        SELECT COUNT(DISTINCT d.id)
+        FROM diaries d
+        LEFT JOIN diary_tags dt ON d.id = dt.diary_id
+        LEFT JOIN tags t ON dt.tag_id = t.id
+        WHERE d.user_id = #{userId}
+          AND d.deleted = 0
+          AND (
+            d.title LIKE CONCAT('%', #{keyword}, '%')
+            OR d.content LIKE CONCAT('%', #{keyword}, '%')
+            OR t.name LIKE CONCAT('%', #{keyword}, '%')
+          )
+    </select>
+
+    <select id="filter" resultType="com.pheney.diary.entity.Diary">
+        SELECT DISTINCT d.id, d.user_id, d.title, d.content, d.mood, d.type,
+               d.voice, d.voice_duration, d.video, d.video_thumb, d.diary_date,
+               d.created_at, d.updated_at, d.deleted
+        FROM diaries d
+        <where>
+            d.user_id = #{userId} AND d.deleted = 0
+            <if test="keyword != null and keyword != ''">
+                AND (d.title LIKE CONCAT('%', #{keyword}, '%')
+                     OR d.content LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+            <if test="type != null and type != ''">
+                AND d.type = #{type}
+            </if>
+            <if test="mood != null and mood != ''">
+                AND d.mood = #{mood}
+            </if>
+            <if test="tag != null and tag != ''">
+                AND d.id IN (
+                    SELECT dt.diary_id FROM diary_tags dt
+                    JOIN tags t ON dt.tag_id = t.id
+                    WHERE t.name = #{tag} AND t.user_id = #{userId}
+                )
+            </if>
+            <if test="startDate != null">
+                AND d.diary_date >= #{startDate}
+            </if>
+            <if test="endDate != null">
+                AND d.diary_date &lt;= #{endDate}
+            </if>
+        </where>
+        ORDER BY d.diary_date DESC, d.created_at DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="countFilter" resultType="long">
+        SELECT COUNT(DISTINCT d.id)
+        FROM diaries d
+        <where>
+            d.user_id = #{userId} AND d.deleted = 0
+            <if test="keyword != null and keyword != ''">
+                AND (d.title LIKE CONCAT('%', #{keyword}, '%')
+                     OR d.content LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+            <if test="type != null and type != ''">
+                AND d.type = #{type}
+            </if>
+            <if test="mood != null and mood != ''">
+                AND d.mood = #{mood}
+            </if>
+            <if test="tag != null and tag != ''">
+                AND d.id IN (
+                    SELECT dt.diary_id FROM diary_tags dt
+                    JOIN tags t ON dt.tag_id = t.id
+                    WHERE t.name = #{tag} AND t.user_id = #{userId}
+                )
+            </if>
+            <if test="startDate != null">
+                AND d.diary_date >= #{startDate}
+            </if>
+            <if test="endDate != null">
+                AND d.diary_date &lt;= #{endDate}
+            </if>
+        </where>
+    </select>
+
+    <select id="countTotalByUserId" resultType="long">
+        SELECT COUNT(*)
+        FROM diaries
+        WHERE user_id = #{userId} AND deleted = 0
+    </select>
+
+    <select id="countThisMonthByUserId" resultType="long">
+        SELECT COUNT(*)
+        FROM diaries
+        WHERE user_id = #{userId}
+          AND YEAR(diary_date) = #{year}
+          AND MONTH(diary_date) = #{month}
+          AND deleted = 0
+    </select>
+
+    <select id="countByType" resultType="map">
+        SELECT type, COUNT(*) as count
+        FROM diaries
+        WHERE user_id = #{userId} AND deleted = 0
+        GROUP BY type
+    </select>
+
+</mapper>

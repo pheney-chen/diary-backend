@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pheney.diary.mapper.TagMapper">
+
+    <select id="findByUserIdAndName" resultType="com.pheney.diary.entity.Tag">
+        SELECT id, user_id, name, created_at
+        FROM tags
+        WHERE user_id = #{userId} AND name = #{name}
+    </select>
+
+    <insert id="insert" parameterType="com.pheney.diary.entity.Tag"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO tags (user_id, name, created_at)
+        VALUES (#{userId}, #{name}, NOW())
+    </insert>
+
+    <update id="updateName">
+        UPDATE tags SET name = #{name} WHERE id = #{id}
+    </update>
+
+    <select id="findAllByUserId" resultType="com.pheney.diary.entity.Tag">
+        SELECT t.id, t.user_id, t.name, t.created_at
+        FROM tags t
+        WHERE t.user_id = #{userId}
+        ORDER BY t.name
+    </select>
+
+    <delete id="deleteById">
+        DELETE FROM tags WHERE id = #{id}
+    </delete>
+
+    <select id="findTagsWithCount" resultType="map">
+        SELECT t.name, COUNT(dt.id) as count
+        FROM tags t
+        LEFT JOIN diary_tags dt ON t.id = dt.tag_id
+        LEFT JOIN diaries d ON dt.diary_id = d.id AND d.deleted = 0
+        WHERE t.user_id = #{userId}
+        GROUP BY t.id, t.name
+        ORDER BY count DESC, t.name
+    </select>
+
+</mapper>

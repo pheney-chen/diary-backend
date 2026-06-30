@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pheney.diary.mapper.DiaryImageMapper">
+
+    <insert id="insert" parameterType="com.pheney.diary.entity.DiaryImage">
+        INSERT INTO diary_images (diary_id, url, sort_order)
+        VALUES (#{diaryId}, #{url}, #{sortOrder})
+    </insert>
+
+    <select id="findByDiaryId" resultType="com.pheney.diary.entity.DiaryImage">
+        SELECT id, diary_id, url, sort_order
+        FROM diary_images
+        WHERE diary_id = #{diaryId}
+        ORDER BY sort_order
+    </select>
+
+    <delete id="deleteByDiaryId">
+        DELETE FROM diary_images WHERE diary_id = #{diaryId}
+    </delete>
+
+</mapper>

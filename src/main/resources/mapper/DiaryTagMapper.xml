@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pheney.diary.mapper.DiaryTagMapper">
+
+    <insert id="insert" parameterType="com.pheney.diary.entity.DiaryTag">
+        INSERT INTO diary_tags (diary_id, tag_id)
+        VALUES (#{diaryId}, #{tagId})
+    </insert>
+
+    <select id="findTagIdsByDiaryId" resultType="long">
+        SELECT tag_id FROM diary_tags WHERE diary_id = #{diaryId}
+    </select>
+
+    <select id="findDiaryIdsByTagId" resultType="long">
+        SELECT diary_id FROM diary_tags WHERE tag_id = #{tagId}
+    </select>
+
+    <delete id="deleteByDiaryId">
+        DELETE FROM diary_tags WHERE diary_id = #{diaryId}
+    </delete>
+
+    <delete id="deleteByTagId">
+        DELETE FROM diary_tags WHERE tag_id = #{tagId}
+    </delete>
+
+</mapper>
