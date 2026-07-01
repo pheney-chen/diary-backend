@@ -65,4 +65,14 @@ public interface DiaryMapper {
                                  @Param("month") int month);
 
     List<Map<String, Object>> countByType(@Param("userId") Long userId);
+
+    List<Diary> findByTag(@Param("userId") Long userId,
+                           @Param("tagName") String tagName,
+                           @Param("offset") int offset,
+                           @Param("limit") int limit);
+
+    long countByTag(@Param("userId") Long userId,
+                    @Param("tagName") String tagName);
+
+    List<String> findTagNamesByDiaryId(@Param("diaryId") Long diaryId);
 }

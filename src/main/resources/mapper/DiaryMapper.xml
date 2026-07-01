@@ -192,4 +192,38 @@
         GROUP BY type
     </select>
 
+    <select id="findByTag" resultType="com.pheney.diary.entity.Diary">
+        SELECT DISTINCT d.id, d.user_id, d.title, d.content, d.mood, d.type,
+               d.voice, d.voice_duration, d.video, d.video_thumb, d.diary_date,
+               d.created_at, d.updated_at, d.deleted
+        FROM diaries d
+        JOIN diary_tags dt ON d.id = dt.diary_id
+        JOIN tags t ON dt.tag_id = t.id
+        WHERE d.user_id = #{userId}
+          AND d.deleted = 0
+          AND t.name = #{tagName}
+          AND t.user_id = #{userId}
+        ORDER BY d.diary_date DESC, d.created_at DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="countByTag" resultType="long">
+        SELECT COUNT(DISTINCT d.id)
+        FROM diaries d
+        JOIN diary_tags dt ON d.id = dt.diary_id
+        JOIN tags t ON dt.tag_id = t.id
+        WHERE d.user_id = #{userId}
+          AND d.deleted = 0
+          AND t.name = #{tagName}
+          AND t.user_id = #{userId}
+    </select>
+
+    <select id="findTagNamesByDiaryId" resultType="string">
+        SELECT t.name
+        FROM tags t
+        JOIN diary_tags dt ON t.id = dt.tag_id
+        WHERE dt.diary_id = #{diaryId}
+        ORDER BY t.name
+    </select>
+
 </mapper>

@@ -1,5 +1,6 @@
 package com.pheney.diary.service;
 
+import com.pheney.diary.dto.response.DiaryResponse;
 import com.pheney.diary.dto.response.TagResponse;
 
 import java.util.List;

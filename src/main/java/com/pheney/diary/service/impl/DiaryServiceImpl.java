@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -238,11 +237,8 @@ public class DiaryServiceImpl implements DiaryService {
         List<DiaryImage> images = diaryImageMapper.findByDiaryId(diary.getId());
         response.setImages(images.stream().map(DiaryImage::getUrl).collect(Collectors.toList()));
 
-        List<Long> tagIds = diaryTagMapper.findTagIdsByDiaryId(diary.getId());
-        List<String> tagNames = new ArrayList<>();
-        for (Long tagId : tagIds) {
-            Tag tag = tagMapper.findByUserIdAndName(diary.getUserId(), null);
-        }
+        List<String> tagNames = diaryMapper.findTagNamesByDiaryId(diary.getId());
+        response.setTags(tagNames);
 
         return response;
     }
